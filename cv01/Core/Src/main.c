@@ -97,31 +97,27 @@ int main(void)
   /* USER CODE BEGIN WHILE */
 
   uint32_t array = 0b10101001110111011100101010000000;
-  uint32_t copy = array;
 
   while (1)
   {
 	  /* USER CODE END WHILE */
 
 	  /* USER CODE BEGIN 3 */
+	  uint32_t copy = array;
 
-	  if (copy&(1ul << 31)) {
+	  while (copy) {
+		  if (copy&(1ul << 31)) {
+			  LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
+		  } else {
+			  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+		  }
 
-		  LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
-
-	  } else {
-
-		  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+		  LL_mDelay(200);
+		  copy = copy << 1;
 	  }
 
-	  LL_mDelay(200);
-	  copy = copy << 1;
-
-	  if (copy == 0) {
-		  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
-		  copy = array;
-		  LL_mDelay(600);
-	  }
+	  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+	  LL_mDelay(600);
 
 	  /* USER CODE END 3 */
   }
