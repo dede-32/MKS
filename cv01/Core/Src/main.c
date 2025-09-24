@@ -102,13 +102,19 @@ int main(void)
     /* USER CODE BEGIN 3 */
 
 
+	  uint8_t array[32] = {1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0};
 
+	  for (uint8_t i = 0; i < 32; i++) {
+	     if (array[i]) {
 
+	          LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
 
-	  LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
-	  LL_mDelay(200);
-	  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
-	  LL_mDelay(200);
+	     } else {
+
+	          LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+	     }
+	              LL_mDelay(200);
+	          }
 
 
 
