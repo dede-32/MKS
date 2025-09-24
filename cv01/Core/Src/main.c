@@ -95,32 +95,36 @@ int main(void)
 
   /* Infinite loop */
   /* USER CODE BEGIN WHILE */
+
+  uint32_t array = 0b10101001110111011100101010000000;
+  uint32_t copy = array;
+
   while (1)
   {
-    /* USER CODE END WHILE */
+	  /* USER CODE END WHILE */
 
-    /* USER CODE BEGIN 3 */
+	  /* USER CODE BEGIN 3 */
 
+	  if (copy&(1ul << 31)) {
 
-	  uint8_t array[32] = {1, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0};
+		  LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
 
-	  for (uint8_t i = 0; i < 32; i++) {
-	     if (array[i]) {
+	  } else {
 
-	          LL_GPIO_SetOutputPin(LD2_GPIO_Port, LD2_Pin);
+		  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+	  }
 
-	     } else {
+	  LL_mDelay(200);
+	  copy = copy << 1;
 
-	          LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
-	     }
-	              LL_mDelay(200);
-	          }
+	  if (copy == 0) {
+		  LL_GPIO_ResetOutputPin(LD2_GPIO_Port, LD2_Pin);
+		  copy = array;
+		  LL_mDelay(600);
+	  }
 
-
-
-
+	  /* USER CODE END 3 */
   }
-  /* USER CODE END 3 */
 }
 
 /**
