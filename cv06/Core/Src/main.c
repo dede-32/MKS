@@ -117,31 +117,67 @@ int main(void)
   /* USER CODE BEGIN WHILE */
   while (1)
   {
-/*
-	  OWConvertAll();
-	  HAL_Delay(CONVERT_T_DELAY);
 
-
-	      int16_t temp_18b20;
-	      if (OWReadTemperature(&temp_18b20)) {
-
-	    	  int16_t tenths = (temp_18b20 >= 0) ? (temp_18b20 + 5) / 10 : (temp_18b20 - 5) / 10;
-
-	          uint8_t led = 0;   // bargraph
-
-	          sct_value((uint16_t)tenths, led);
-	      }*/
+	  uint16_t value = 0;
+	  uint8_t  led   = 4;
 
 	  uint16_t ad = HAL_ADC_GetValue(&hadc);
-
 	  int16_t t10 = ntc_table[ad];
-	  if (t10 < 0) t10 = 0;
 
-	  uint8_t led = 0;   // bargraph
+	  static uint8_t  running = 0;
+	  static uint32_t start = 0;
+	  static uint16_t last_temp = 0;
 
-	  sct_value((uint16_t)t10, led);
+	  uint32_t now = HAL_GetTick();
 
-	  HAL_Delay(1000);
+	  // new conversion
+	  if (!running ) {
+		  OWConvertAll();
+		  running = 1;
+		  start = now;
+	  }
+
+	  // read conversion
+	  if (running && (now - start) >= 750) {
+		  int16_t t100;
+		  if (OWReadTemperature(&t100)) {
+			  int16_t t10 = (t100 >= 0) ? (t100 + 5) / 10 : (t100 - 5) / 10;
+
+			  last_temp = t10;
+		  }
+
+		  running = 0;
+
+	  }
+
+	  static enum { SHOW_18B20, SHOW_NTC } state = SHOW_NTC;
+
+
+	  if ((HAL_GPIO_ReadPin(S1_GPIO_Port, S1_Pin) == GPIO_PIN_RESET)){
+		  state = SHOW_18B20;
+		  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_RESET);
+	  }
+
+	  else if (HAL_GPIO_ReadPin(S2_GPIO_Port, S2_Pin) == GPIO_PIN_RESET){
+		  state = SHOW_NTC;
+		  HAL_GPIO_WritePin(LED1_GPIO_Port, LED1_Pin, GPIO_PIN_SET);
+		  HAL_GPIO_WritePin(LED2_GPIO_Port, LED2_Pin, GPIO_PIN_RESET);
+	  }
+
+	  switch (state)
+	  {
+	  case SHOW_18B20:
+		  value = last_temp;
+		  break;
+
+	  case SHOW_NTC:
+		  value = t10;
+		  HAL_Delay(100);
+		  break;
+	  }
+
+	  sct_value(value, led);
 
 
     /* USER CODE END WHILE */
