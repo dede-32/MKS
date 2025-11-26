@@ -59,7 +59,7 @@ static void MX_USART3_UART_Init(void);
 
 void step(int x, int y, bool btn);
 void circle(int radius);
-void draw_eyes_nose(void);
+void smiley(void);
 
 /* USER CODE END PFP */
 
@@ -108,18 +108,15 @@ int main(void)
   while (1)
   {
 
-	  static uint8_t last_btn = GPIO_PIN_SET;
+	  static uint8_t end = 1;
 
-	      uint8_t now = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
+	  uint8_t now = HAL_GPIO_ReadPin(B1_GPIO_Port, B1_Pin);
 
+	  if (end == 1 && now == 0){
+		  smiley();
+	  }
 
-	      if (last_btn == GPIO_PIN_SET && now == GPIO_PIN_RESET) {
-	          draw_eyes_nose();
-	      }
-
-	      last_btn = now;
-
-
+	  end = now;
 
 
     /* USER CODE END WHILE */
@@ -314,54 +311,56 @@ void step(int x, int y, bool btn){
 void circle(int radius)
 {
     const int steps = 50;
-    float angle_step = 2.0f * (float)M_PI / steps;
+    float angle_step = 2.0f * M_PI / steps;
 
-    int sx = 0;   // previous integer x
-    int sy = 0;   // previous integer y
+    // calculate start step
+    float a0 = 0;
+    int start_x = radius * cosf(a0);
+    int start_y = radius * sinf(a0);
 
-    // Press and hold the left mouse button
+    // move to start
+    step(start_x, start_y, false);
+
     step(0, 0, true);
 
-    for (int i = 0; i <= steps; i++)
+    int draw_x = start_x;
+    int draw_y = start_y;
+
+    for (int i = 1; i <= steps; i++)
     {
         float a = i * angle_step;
-        float xf = radius * cosf(a);
-        float yf = radius * sinf(a);
+        int x = radius * cosf(a);
+        int y = radius * sinf(a);
+        // draw circle
+        step(x - draw_x, y - draw_y, true);
 
-        int x = (int)xf;
-        int y = (int)yf;
-
-        int dx = x - sx;
-        int dy = y - sy;
-
-        if (dx != 0 || dy != 0)
-            step(dx, dy, true);
-
-        sx = x;
-        sy = y;
+        draw_x = x;
+        draw_y = y;
     }
 
-    // Release the button
     step(0, 0, false);
 }
 
-void draw_eyes_nose(void)
+void smiley(void)
 {
-    // left eye
-    step(-20, -10, false);
-    step(0, 0, true);
+    // circle
     step(0, 0, false);
+    circle(80);
+
+    // left eye
+    step(-20, -15, false);
+    circle(8);
 
     // right eye
     step(40, 0, false);
-    step(0, 0, true);
-    step(0, 0, false);
+    circle(8);
 
     // nose
-    step(-20, 20, false);
+    step(-20, 25, false);
     step(0, 0, true);
-    step(0, -10, true);
+    step(0, -15, true);
     step(0, 0, false);
+
 }
 
 /* USER CODE END 4 */
