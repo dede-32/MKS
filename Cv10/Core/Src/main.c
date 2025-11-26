@@ -58,7 +58,7 @@ static void MX_USART3_UART_Init(void);
 /* USER CODE BEGIN PFP */
 
 void step(int x, int y, bool btn);
-void circle(int radius);
+void circle(int radius, int divide);
 void smiley(void);
 
 /* USER CODE END PFP */
@@ -308,58 +308,64 @@ void step(int x, int y, bool btn){
 
 }
 
-void circle(int radius)
+
+
+void circle(int radius, int divide)
 {
-    const int steps = 50;
-    float angle_step = 2.0f * M_PI / steps;
+	const int steps = 50;
+	float angle_step = 2.0f * M_PI / steps;
 
-    // calculate start step
-    float a0 = 0;
-    int start_x = radius * cosf(a0);
-    int start_y = radius * sinf(a0);
+	// calculate start step
+	float a0 = 0;
+	int start_x = radius * cosf(a0);
+	int start_y = radius * sinf(a0);
 
-    // move to start
-    step(start_x, start_y, false);
+	// move to start
+	step(start_x, start_y, false);
 
-    step(0, 0, true);
+	step(0, 0, true);
 
-    int draw_x = start_x;
-    int draw_y = start_y;
+	int draw_x = start_x;
+	int draw_y = start_y;
 
-    for (int i = 1; i <= steps; i++)
-    {
-        float a = i * angle_step;
-        int x = radius * cosf(a);
-        int y = radius * sinf(a);
-        // draw circle
-        step(x - draw_x, y - draw_y, true);
+	for (int i = 1; i <= steps/divide; i++)
+	{
+		float a = i * angle_step;
+		int x = radius * cosf(a);
+		int y = radius * sinf(a);
+		// draw half circle
+		step(x - draw_x, y - draw_y, true);
 
-        draw_x = x;
-        draw_y = y;
-    }
+		draw_x = x;
+		draw_y = y;
+	}
 
-    step(0, 0, false);
+	step(0, 0, false);
 }
 
 void smiley(void)
 {
     // circle
     step(0, 0, false);
-    circle(80);
+    circle(80, 1);
 
     // left eye
-    step(-20, -15, false);
-    circle(8);
+    step(-65, -15, false);
+    circle(8, 1);
 
     // right eye
     step(40, 0, false);
-    circle(8);
+    circle(8, 1);
 
     // nose
     step(-20, 25, false);
     step(0, 0, true);
     step(0, -15, true);
     step(0, 0, false);
+
+    // mouth
+    step(-20, 20, false);
+    circle(30, 2);
 
 }
 
